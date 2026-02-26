@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Bike Racing</title>
+
+<style>
+body { margin:0; overflow:hidden; background:black; font-family:Arial; }
+#menu, #gameOver {
+position:absolute;
+top:40%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+padding:20px;
+text-align:center;
+}
+#hud {
+position:absolute;
+top:10px;
+left:10px;
+color:white;
+}
+button{
+padding:10px 20px;
+}
+</style>
+
+</head>
+<body>
+
+<div id="menu">
+<h2>3D Bike Racing</h2>
+<button onclick="startGame()">Start Game</button>
+</div>
+
+<div id="hud" style="display:none;">
+Score: <span id="score">0</span>
+</div>
+
+<div id="gameOver" style="display:none;">
+<h2>Game Over</h2>
+<button onclick="location.reload()">Restart</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+
+let scene,camera,renderer,bike,road;
+let speed=0.4;
+let score=0;
+let gameRunning=false;
+
+function init(){
+
+scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87ceeb);
+
+camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+
+renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+let light=new THREE.DirectionalLight(0xffffff,1);
+light.position.set(0,10,10);
+scene.add(light);
+
+let roadGeo=new THREE.PlaneGeometry(6,1000);
+let roadMat=new THREE.MeshStandardMaterial({color:0x222222});
+road=new THREE.Mesh(roadGeo,roadMat);
+road.rotation.x=-Math.PI/2;
+scene.add(road);
+
+let bikeGeo=new THREE.BoxGeometry(0.6,0.4,1);
+let bikeMat=new THREE.MeshStandardMaterial({color:0xff0000});
+bike=new THREE.Mesh(bikeGeo,bikeMat);
+bike.position.y=0.5;
+scene.add(bike);
+
+camera.position.set(0,3,6);
+camera.lookAt(bike.position);
+}
+
+function animate(){
+if(!gameRunning) return;
+requestAnimationFrame(animate);
+
+road.position.z+=speed;
+if(road.position.z>500) road.position.z=0;
+
+score++;
+document.getElementById("score").innerText=score;
+
+renderer.render(scene,camera);
+}
+
+function startGame(){
+document.getElementById("menu").style.display="none";
+document.getElementById("hud").style.display="block";
+if(!scene) init();
+gameRunning=true;
+animate();
+}
+
+document.addEventListener("keydown",e=>{
+if(e.key==="ArrowLeft" && bike.position.x>-2.5) bike.position.x-=0.5;
+if(e.key==="ArrowRight" && bike.position.x<2.5) bike.position.x+=0.5;
+});
+
+</script>
+
+</body>
+</html>
